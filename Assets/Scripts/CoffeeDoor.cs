@@ -56,4 +56,10 @@ public class CoffeeDoor : MonoBehaviour
         if (spawnCoroutine != null)
             StopCoroutine(spawnCoroutine);
     }
+    public void ResumeSpawning()
+    {
+        if (spawnCoroutine == null)
+            spawnCoroutine = StartCoroutine(SpawnBeanSacksRoutine());
+    }
+
 }

@@ -7,11 +7,11 @@ public class BeansContainer : MonoBehaviour
     [Header("Grid Settings")]
     public int gridSizeX = 3;
     public int gridSizeY = 3;
-    public float spacing = 0.33f;
+    public float spacing = 3.3f;
 
     [Header("Stack Settings")]
     public int sackLayers = 3;
-    public float layerOffsetY = 0.05f; // altura visual de cada capa
+    public float layerOffsetY = 0.5f; // altura visual de cada capa
     public int maxSacks = 45;           // máximo de sacos visibles
     [Range(0, 45)]
     public int currentCount = 0;        // cuántos sacos mostrar
@@ -21,8 +21,14 @@ public class BeansContainer : MonoBehaviour
 
     private List<GameObject> BeanSacksList = new List<GameObject>();
 
+    private CoffeeDoor CoffeeDoor;
+    private bool isDragging;
+    private BeanSackDrag currentDraggedSack;
+
+
     void Start()
     {
+        CoffeeDoor = GetComponentInParent<CoffeeDoor>();
         GenerateSacks();
         UpdateSacksVisual();
     }
@@ -67,7 +73,6 @@ public class BeansContainer : MonoBehaviour
             }
         }
     }
-
     // Actualiza la visibilidad según el contador
     public void UpdateSacksVisual()
     {
@@ -80,7 +85,6 @@ public class BeansContainer : MonoBehaviour
             }
         }
     }
-
     void ClearSacks()
     {
         foreach (var sack in BeanSacksList)
@@ -91,5 +95,45 @@ public class BeansContainer : MonoBehaviour
 
         BeanSacksList.Clear();
     }
+    public bool CanStartDrag()
+    {
+        return !isDragging && currentCount > 0;
+    }
+
+    public void OnStartDragging(BeanSackDrag sack)
+    {
+        isDragging = true;
+        currentDraggedSack = sack;
+
+        currentCount--;
+        UpdateSacksVisual();
+
+        if (CoffeeDoor != null)
+            CoffeeDoor.StopSpawning();
+    }
+    public void OnEndDragging(bool validDrop)
+    {
+        isDragging = false;
+        currentDraggedSack = null;
+
+        if (CoffeeDoor != null)
+            CoffeeDoor.ResumeSpawning();
+    }
+    public bool IsValidDropPosition(Vector3 worldPos)
+    {
+        //  AQUÍ defines la lógica real
+        // Por ahora, ejemplo simple:
+        return worldPos.x > 5f;
+    }
+    public GameObject GetLastVisibleSack()
+    {
+        for (int i = currentCount - 1; i >= 0; i--)
+        {
+            if (BeanSacksList[i] != null)
+                return BeanSacksList[i];
+        }
+        return null;
+    }
+
 }
 
